@@ -1,0 +1,1209 @@
+#!/bin/bash
+# ---------------------------------------------------------------------------
+# The NMAP Quick Console (NMAP-QCon)
+#
+# Copyright 2015, JC Beasley beaswork@gmail.com
+#feel free to tweek and adjust to fit your need
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License at <http://www.gnu.org/licenses/> for
+# more details.
+#
+# Usage: Menu Driven Quick Consonle for Nmap, launch nmap tool with ease also add existing nmap options for more detailed results
+#
+# Revision history: ver.0.1
+# ---------------------------------------------------------------------------
+####VARIABLES GO HERE####
+
+#####FUNCTIONS GO HERE####
+# ensure running as root
+# initiate super user access, enter password when prompted
+function SUPERYOU(){
+if [ $(id -u) != "0" ]; then
+    echo "You must be the superuser to run this script" >&2
+    exec sudo "$0" "$@"
+    exit 1
+elif [ $(id -u) = "0" ]; then
+    echo "Hello superuser"
+fi
+}
+
+# ensure running as root
+SUPERYOU
+clear
+echo
+echo
+echo "____________________________NMAP-QCON______________________________________"
+echo 
+echo "               Menu Driven Quick Console for NMAP                          "                         
+echo "               ----------------------------------                          "
+echo
+echo "----------What Type of Scanning do you want to perform?--------------------"
+echo
+echo
+echo
+echo "---------------------SCANNING TECHNIQUES-----------------------------------"
+echo
+echo
+#Select the type of NMAP scan
+SELECTION="Basic-Scan Advanced-Scan Discovery Port-Scan Version-Detect Timing FireWall-Evasion Output TroubleShoot-Debug NSE QUIT"
+select options in $SELECTION; do 
+case $options in
+
+
+#Select options to perfom Basic Nmap Scan
+
+Basic-Scan)
+clear
+echo "---------------------BASIC SCANNING OPTIONS--------------------------------"
+echo
+echo
+SELECTION="Scan-Single-Target Scan-Multi-Targets Scan-List-of-Targets Scan-Range-of-Host Scan-Entire-Subnet Scan-Random-Host Aggressive-Scan"
+select bscan in $SELECTION; do
+case $bscan in
+	
+	Scan-Single-Target)
+	#nmap [target]
+	echo "----------------PURPOSE-----------------------"
+	echo
+	echo "----basic scan on the specified target--------"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo 
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap $target
+    break
+	;;
+
+
+	
+	Scan-Multi-Targets)
+	#nmap [target1 target2 ect]
+	echo "----------------PURPOSE-----------------------"
+	echo
+	echo "----scan multiple hosts at the same time------"
+	echo "------enter at least 2 host ip addresses------"
+	echo "add additional option to end of target address"
+	echo 
+	echo "Enter target hosts/ip"
+	read -rp: target1 target2 
+	nmap $target1 $target2
+	break
+	;;
+
+	
+	Scan-List-of-Targets)
+	#nmap -iL [list.txt]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "--If you have a large number of systems-------" 
+	echo "--------to scan, you can enter the IP---------" 
+	echo "---address (or host names) in a text file-----"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo -e "Enter absolute path of the file name you want to read"
+	read file
+	exec <$file # redirects stdin to a file
+	while read list
+	do
+	#Create variable based on user name
+	read list
+	nmap $list
+	done
+	break
+	;;
+
+	
+	Scan-Range-of-Host)
+	#nmap [range of ip address]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "------A range of IP addresses can be ---------" 
+	echo "-------used for target specification----------" 
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter IP Range"
+	read -rp: range
+	nmap $range
+	break
+	;;
+
+	
+	Scan-Entire-Subnet)
+	#nmap [ip address/cdir]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "--------scan an entire subnet using-----------" 
+	echo "CIDR (Classless Inter-Domain Routing) notation"  
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo 
+	echo "Enter Entire Subnet"
+	read -rp: subnet
+	nmap $subnet
+	break
+	;;
+
+	
+	Scan-Random-Host)
+	#nmap -iR [number]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "----select random internet hosts to scan------"
+	echo "--Nmap will randomly generate the specified---" 
+	echo "-number of targets and attempt to scan them---"   
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter host/ip"
+	echo 
+	read -rp: random
+	nmap -iR $random
+	break
+	;;
+
+	
+	Aggressive-Scan)
+	#nmap -A [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "-------aggressive scan selects some of--------" 
+	echo "--the most commonly used options within Nmap--"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -A $target
+	break
+	;;
+	
+	esac
+	done
+
+;;
+
+
+#
+Advanced-Scan)
+clear
+echo "---------------------ADVANCED SCANNING OPTIONS-----------------------------------"
+echo
+echo
+SELECTION="TCP-SYN-Scan TCP-Connect-Scan UDP-Scan TCP-Null-Scan TCP-FIN-Scan Xmas-Scan TCP-ACK-Scan Custom-TCP-Scan IP-Protocol-Scan Send-Raw-Eth-Packets Send-IP-Packets"
+select advscan in $SELECTION; do
+case $advscan in
+
+	TCP-SYN-Scan)
+	#nmap -sS [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo 
+	echo "----The default TCP SYN scan attempts to------"
+    echo "----identify the 1000 most commonly used------" 
+    echo "----TCP ports by sending a SYN packet to------" 
+    echo "----the target and listening for a response---" 
+	echo "----a simple ping of the specified host-------"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -sS $target
+	break
+	;;
+
+
+	TCP-Connect-Scan)
+	#nmap -sT [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "---The TCP Connect Scan is a simple probe-----"
+	echo "---that attempts to directly connect to-------"
+	echo "---the remote system without using any stealth" 
+
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -sT $target
+	break
+	;;
+
+
+	UDP-Scan)
+	#nmap -sU [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "-------aggressive scan selects some of--------" 
+	echo "--the most commonly used options within Nmap--"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -sU $target
+	break
+	;;
+
+	
+	TCP-Null-Scan)
+	#nmap -sN [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "-------aggressive scan selects some of--------" 
+	echo "--the most commonly used options within Nmap--"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -sN $target
+	break
+	;;
+
+
+	TCP-FIN-Scan)
+	#nmap -sF [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "-------aggressive scan selects some of--------" 
+	echo "--the most commonly used options within Nmap--"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -sF $target
+	break
+	;;
+
+	
+	Xmas-Scan)
+	#nmap -sX [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "-------aggressive scan selects some of--------" 
+	echo "--the most commonly used options within Nmap--"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -sX $target
+	break
+	;;
+
+	
+	TCP-ACK-Scan)
+	#nmap -sA [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "-------aggressive scan selects some of--------" 
+	echo "--the most commonly used options within Nmap--"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -sA $target
+	break
+	;;
+	
+
+	Custom-TCP-Scan)
+	#nmap --scanflags [flags] [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "-------aggressive scan selects some of--------" 
+	echo "--the most commonly used options within Nmap--"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	echo "Enter Scan Flag"
+	read -p: flags
+	nmap --scanflags $flags $target
+	break
+	;;
+
+	
+	IP-Protocol-Scan)
+	#nmap -sO [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "-------aggressive scan selects some of--------" 
+	echo "--the most commonly used options within Nmap--"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -sO $target
+	break
+	;;
+
+	
+	Send-Raw-Eth-Packets)
+	#nmap --send-eth [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "-------aggressive scan selects some of--------" 
+	echo "--the most commonly used options within Nmap--"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap --send-eth $target
+	break
+	;;
+
+	
+	Send-IP-Packets)
+	#nmap --send-ip [target]
+	echo "-------------------PURPOSE--------------------"
+	echo
+	echo "-------aggressive scan selects some of--------" 
+	echo "--the most commonly used options within Nmap--"
+	echo "----------------------------------------------"
+	echo "add additional option to end of target address"
+	echo
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap --send-ip $target
+	break
+	;;
+
+
+	esac
+	done
+
+;;
+
+
+#
+Discovery)
+clear
+echo "---------------------DISCOVERY OPTIONS-----------------------------------"
+echo
+echo
+SELECTION="Ping-Only Dont-Ping TCP-SYN-Ping TCP-ACK-Ping UDP-Ping SCTP-INIT-Ping ICMP-Echo-Ping ICMP-Timestamp-Ping ICMP-Addr-Mask-Ping IP-Protocol-Ping ARP-Ping Traceroute Reverse-DNS-Resolution Create-Host-List"
+select discover in $SELECTION; do
+case $discover in
+
+	Ping-Only)
+	#nmap -sP [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -sP $target
+	break
+	;;
+
+
+	Dont-Ping)
+	#nmap -PN [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -PN $target
+	break
+	;;
+
+
+	TCP-SYN-Ping)
+	#nmap -PS [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -PS $target
+	break
+	;;
+
+	
+	TCP-ACK-Ping)
+	#nmap -PA [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -PA $target
+	break
+	;;
+
+
+	UDP-Ping)
+	#nmap -PU [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -PU $target
+	break
+	;;
+
+	
+	SCTP-INIT-Ping)
+	#nmap -PY [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -PY $target
+	break
+	;;
+
+	
+	ICMP-Echo-Ping)
+	#nmap -PE [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -PE $target
+	break
+	;;
+	
+
+	ICMP-Timestamp-Ping)
+	#nmap -PP [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -PP $target
+	break
+	;;
+
+	
+	ICMP-Addr-Mask-Ping)
+	#nmap -PM [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -PM $target
+	break
+	;;
+	
+
+	
+	IP-Protocol-Ping)
+	#nmap -PO [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -PO $target
+	break
+	;;
+
+	
+	ARP-Ping)
+	#nmap -PR [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -PR $target
+	break
+	;;
+
+
+	Traceroute)
+	#nmap --traceroute [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap --traceroute $target
+	break
+	;;
+
+
+	Reverse-DNS-Resolution)
+	#nmap -R [target]
+	echo "Enter Target host/ip"
+	read -rp: target
+	nmap -R $target
+	break
+	;;
+
+
+	Create-Host-List)
+	#nmap -sL [ip address/cdir]
+	echo "Enter Target Subnet"
+	read -rp: target
+	nmap -sL $target
+	break
+	;;
+
+
+	esac
+	done
+
+;;
+
+
+#
+Port-Scan)
+clear
+echo "---------------------PORT SCANNING OPTIONS-----------------------------------"
+echo
+echo
+SELECTION="Fast-Scan Scan-Specific-Port Scan-by-Name Scan-by-Protocol Scan-all-Ports Scan-top-Ports Sequential-Port-Scan"
+select portscan in $SELECTION; do
+case $portscan in
+
+	Fast-Scan)
+	#nmap -F [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -F $target
+	break
+	;;
+
+
+	Scan-Specific-Port)
+	#nmap -p [port(s)] [target]
+	echo "Enter Port"
+	read -rp: port
+	echo "Enter Target Host/IP"	
+	read -rp: target
+	nmap -p $port $target
+	break
+	;;
+
+
+	Scan-by-Name)
+	#nmap -p [port name(s)] [target]
+	echo "Enter Port Name"
+	read -rp: prtname
+	echo "Enter Targer Host/IP"
+	read -rp: target
+	nmap -p $prtname $target
+	break
+	;;
+
+	
+	Scan-by-Protocol)
+	#nmap -sU -sT -pU:[ports],T:[ports] [target]
+	echo "Enter Protocol TCP or UDP"
+	read -rp: protocol	
+	   if   [ $protocol = TCP ] || [ $protocol = tcp ]; then
+		echo "You have selected TCP port Scan"
+		echo
+		echo "Enter Port Number" 
+		read -rp: portnumber
+		echo "Enter Targer Host/IP"
+		read -p: target
+		nmap -sT -p T:$portnumber $target
+		break 
+	   elif [ $protocol = UDP ] || [ $protocol = udp ]; then
+		echo "You have selected UDP port Scan"
+		echo
+		echo "Enter Port Number" 
+		read -rp: portnumber
+		echo "Enter Targer Host/IP"
+		read -rp: target
+		nmap -sU -p U:$portnumber $target
+		break
+	   fi
+	;;
+
+
+	Scan-all-Ports)
+	#nmap -p '*' [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -p '*' $target
+	break
+	;;
+
+	
+	Scan-top-Ports)
+	#nmap --top-ports [number][target]
+	echo "Enter total number of ports to Scan"
+	read -rp: number
+	echo "Enter Targer Host/IP"
+	read -rp: target
+	nmap --top-ports $number $target
+	break
+	;;
+
+	
+	Sequential-Port-Scan)
+	#nmap -r [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -r $target
+	break
+	;;
+	
+
+	esac
+	done
+
+;;
+
+
+#
+Version-Detect)
+clear
+echo "---------------------VERSION DETECTION OPTIONS-----------------------------------"
+echo
+echo
+SELECTION="OS-Detection Guess-Unknow-OS Service-Version Troubleshoot-Version-Scans RPC-Scan"
+select verdetect in $SELECTION; do
+case $verdetect in
+
+	OS-Detection)
+	#nmap -O [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -O $target
+	break
+	;;
+
+
+	Guess-Unknow-OS)
+	#nmap -O --osscan-guess [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -O --osscan-guess $target
+	break
+	;;
+
+
+	Service-Version)
+	#nmap -sV [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -sV $target
+	break
+	;;
+
+	
+	Troubleshoot-Version-Scans)
+	#nmap -sV --version-trace [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -sV --version-trace $target
+	break
+	;;
+
+
+	RPC-Scan)
+	#nmap -sR [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -sR $target
+	break
+	;;
+
+
+	esac
+	done
+
+;;
+
+
+#
+Timing)
+clear
+echo "---------------------TIMING OPTIONS-----------------------------------"
+echo
+echo
+SELECTION="Timing-Template Set-Packet-TTL Min-Parallel-Ops Max-Parallel-Ops Min-HostGroup-Size Max-HostGroup-Size Initial-RTT-Timeout Max-RTT-Timeout Max-Retries Host-Timeout Min-Scan-Delay Max-Scan-Delay Min-Packet-Rate Max-Packet-Rate Defeat-Reset-Rate-Limits"
+select timing in $SELECTION; do
+case $timing in
+
+	Timing-Template)
+	#nmap -T[0-5] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -T $target
+	break
+	;;
+
+
+	Set-Packet-TTL)
+	#nmap --ttl [time] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --ttl $target
+	break
+	;;
+
+
+	Min-Parallel-Ops)
+	#nmap --min-parallelism [number] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --min-parallelism $target
+	break
+	;;
+
+	
+	Max-Parallel-Ops)
+	#nmap --max-parallelism [number] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --max-parallelism $target
+	break
+	;;
+
+
+	Min-HostGroup-Size)
+	#nmap --min-hostgroup [number] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --min-hostgroup $target
+	break
+	;;
+
+	
+	Max-HostGroup-Size)
+	#nmap --max-hostgroup [number] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --max-hostgroup $target
+	break
+	;;
+
+	
+	Initial-RTT-Timeout)
+	#nmap --initial-rtt-timeout [time] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --initial-rtt-timeout $target
+	break
+	;;
+	
+
+	Max-RTT-Timeout)
+	#nmap --max-rtt-timeout [TTL] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --max-rtt-timeout $target
+	break
+	;;
+
+	
+	Max-Retries)
+	#nmap --max-retries [number] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --max-retries $target
+	break
+	;;
+
+	
+	Host-Timeout)
+	#nmap --host-timeout [time] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --host-timeout $target
+	break
+	;;
+
+	
+	Min-Scan-Delay)
+	#nmap --scan-delay [time] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --scan-delay $target
+	break
+	;;
+
+
+	Max-Scan-Delay)
+	#nmap --max-delay [time] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --max-delay $target
+	break
+	;;
+
+
+	Min-Packet-Rate)
+	#nmap --min-rate [number] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --min-rate $target
+	break
+	;;
+
+
+	Max-Packet-Rate)
+	#nmap --max-rate [number] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --max-rate $target
+	break
+	;;
+
+
+	Defeat-Reset-Rate-Limits)
+	#nmap --defeat-rst-ratelimit [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --defeat-rst-ratelimit $target
+	break
+	;;
+	
+	esac
+	done
+
+;;
+
+
+#
+FireWall-Evasion)
+clear
+echo "---------------------FIREWALL-EVASION OPTIONS-----------------------------------"
+echo
+echo
+SELECTION="Fragment-Packets MTU Use-Decoy Idle-Zombie-Scan Specify-Port Append-Random-Data Send-Bad-Checksums Randomize-Target-Scan-Order Spoof-MAC-Address"
+select fireva in $SELECTION; do
+case $fireva in
+
+	Fragment-Packets)
+	#nmap -f [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -f $target
+	break
+	;;
+
+
+	MTU)
+	#nmap --mtu [MTU] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	echo "Set MTU Amount"
+	read -rp: mtu
+	nmap -mtu $mtu $target
+	break
+	;;
+
+
+	Use-Decoy)
+	#nmap -D RND:[number] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	echo "Enter Number of Decoys to Use"
+	read -rp: decoys
+	nmap -D RND:$decoys $target
+	break
+	;;
+
+	
+	Idle-Zombie-Scan)
+	#nmap -sI [zombie] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -sI $target
+	break
+	;;
+
+
+	Specify-Port)
+	#nmap --source-port [port] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	echo "Enter a Source Port"
+	read -rp: sport
+	nmap --source-port $sport $target
+	break
+	;;
+
+
+	Append-Random-Data)
+	#nmap --data-length [size] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	echo "Enter Data Length"
+	read -rp: data
+	nmap --data-length $data $target
+	break
+	;;
+
+
+	Send-Bad-Checksums)
+	#nmap --badsum [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --badsum $target
+	break
+	;;
+
+
+	Randomize-Target-Scan-Order)
+	#nmap --randomize-hosts [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --randomize-hosts $target
+	break
+	;;
+
+
+	Spoof-MAC-Address)
+	#nmap --spoof-mac [MAC|0|vendor] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --spoof-mac 0 $target
+	break
+	;;
+
+
+	esac
+	done
+
+;;
+
+
+#
+Output)
+clear
+echo "---------------------OUTPUT OPTIONS-----------------------------------"
+echo
+echo
+SELECTION="Save-to-Text-File Save-to-XML-File Grepable-Output Display-Statistics 133t-Output All-Support-FileTypes"
+select output in $SELECTION; do
+case $output in
+
+	Save-to-Text-File)
+	#nmap -oN [scan.txt] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -oN $target
+	break
+	;;
+
+
+	Save-to-XML-File)
+	#nmap -oN [scan.xml] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -oN $target
+	break
+	;;
+
+
+	Grepable-Output)
+	#nmap -oG [scan.txt] [targets]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -oG $target
+	break
+	;;
+
+	
+	Display-Statistics)
+	#nmap --stats-every [time] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	echo "How much time in seconds"
+	read -rp: time
+	nmap --stats-every $time $target
+	break
+	;;
+
+
+	133t-Output)
+	#nmap -oS [scan.txt] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -oS $target
+	break
+	;;
+
+	
+	All-Support-FileTypes)
+	#nmap -oA [path/filename] [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -oA $target
+	break
+	;;
+
+	
+	esac
+	done
+
+;; 
+
+
+#
+TroubleShoot-Debug)
+clear
+echo "---------------------TROUBLESHOOTING-DEBUG OPTIONS-----------------------------------"
+echo
+echo
+SELECTION="Verbos-Output Debugging Port-State-Reason Display-Open-Ports Trace-Packets Host-Networking Specify-Interface NMAP-Version"
+select troubleshoot in $SELECTION; do
+case $troubleshoot in
+
+	Verbos-Output)
+	#nmap -v [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -v $target
+	break
+	;;
+
+
+	Debugging)
+	#nmap -d [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap -d $target
+	break
+	;;
+
+	
+	Port-State-Reason)
+	#nmap nmap --reason [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --reason [target] $target
+	break
+	;;
+
+
+	Display-Open-Ports)
+	#nmap --open [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --open $target
+	break
+	;;
+
+
+	Trace-Packets)
+	#nmap --packet-trace [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --packet-trace $target
+	break
+	;;
+
+
+	Host-Networking)
+	#nmap --randomize-hosts [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	nmap --randomize-hosts $target
+	break
+	;;
+
+
+	Specify-Interface)
+	#nmap --iflist
+	echo "Displaying Host interface info"
+	nmap --iflist
+	break
+	;;
+
+
+	NMAP-Version)
+	#nmap -V 
+	echo "NMAP Version"
+	nmap -V
+	break
+	;;
+
+
+	esac
+	done
+
+;;
+
+
+#
+NSE)
+clear
+echo "---------------------SCRIPTING ENGINE OPTIONS-----------------------------------"
+echo
+echo
+SELECTION="Excecute-Individual-Scripts Excecute-Multiple-Scripts Scripts-by-Category Multiple-Scripts-by-Category Troubleshoot-Scripts Update-Scripts-Database"
+select nse in $SELECTION; do
+case $nse in
+
+	Excecute-Individual-Scripts)
+	#nmap --script [script.nse] [target]
+	echo "Enter target Host/IP"
+	read -rp: target
+	echo "Enter Script Name"
+	read -rp: name
+	nmap --script $name $target
+	break
+	;;
+
+
+	Excecute-Multiple-Scripts)
+	#nmap --script [expression] [target]
+	echo "Enter target Host/IP"
+	read -rp: target
+	nmap --script $target
+	break
+	;;
+
+
+	Scripts-by-Category)
+	#nmap --script [category] [target]
+	echo "-------------------------Script Categories-----------------------------"
+	echo 
+	echo "all, auth, default, discovery, external, intrusive, malware, safe, vuln"
+	echo
+	echo " Select Category to Run"
+	read -rp: category
+	echo 
+	echo "Enter target Host/IP"
+	read -rp: target
+	nmap --script $category $target
+	break
+	;;
+
+	
+	Multiple-Scripts-by-Category)
+	#nmap --script [category1,category2,etc][target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	echo "Enter Categories"
+	read -rp: multi
+	nmap --script $multi $target
+	break
+	;;
+
+
+	Troubleshoot-Scripts)
+	#nmap --script [script] --script-trace [target]
+	echo "Enter Target Host/IP"
+	read -rp: target
+	echo "Enter Script Name"
+	read -rp: name
+	nmap --script $name --script-trace $target
+	break
+	;;
+
+
+	Update-Scripts-Database)
+	#nmap --script-updatedb
+	echo "Updating NSE Database"
+	nmap --script-updatedb
+	break
+	;;
+
+
+	esac
+	done
+
+;;
+
+
+#
+QUIT)
+        echo "You have selected $options"
+        echo 
+        echo "Thank you for using NQC "
+        echo "------------------------"
+        echo "  NMAP QUICK CONSOLE    "
+        echo "------------------------"
+    exit $?
+;;
+esac
+done
